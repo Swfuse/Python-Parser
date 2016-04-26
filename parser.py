@@ -6,22 +6,24 @@ import csv
 BASE_URL = 'https://www.weblancer.net/jobs/'
 
 def get_html(url):
+    """Данный метод берет запрос на страницу и читает данные"""
     response = request.urlopen(url)
     return response.read()
 
 def get_page_count(html):
-
+    """В этом методе берем все номера страниц"""
     soup = BeautifulSoup(html, 'lxml')
     pagination =  soup.find('ul', class_= 'pagination')
 
-    #for row in pagination.find_all('li'):
-    #    print(row)
+
     number = pagination.find_all('a')[-1]
     return int(((number.get('href'))[12:]))
 
 
 
 def parse(html):
+    """Здесь, собственно, парсим каждую страницу отдельно,
+       заносим информацию в словарь"""
     soup = BeautifulSoup(html, 'lxml')
     table =  soup.find('div', class_= 'container-fluid cols_table show_visited')
 
@@ -37,9 +39,10 @@ def parse(html):
             })
 
     return projects
-    #print(cols)
 
 def save(projects, path):
+    """В этом методе записываем по категориям все данные,
+       в таком порядке, как они были записаны раннее"""
     with open(path, 'w') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(('Проект', 'Категории', 'Цена', 'Заявки'))
@@ -50,12 +53,7 @@ def save(projects, path):
 
 
 
-
-
-
 def main():
-    # print(parse(get_html(BASE_URL)))
-    #print(get_page_count(get_html(BASE_URL)))
     page_count = get_page_count(get_html(BASE_URL))
 
     print('Всего найдено страниц %d ' % page_count)
@@ -68,7 +66,5 @@ def main():
 
     save(projects, 'projects.csv')
 
-    # for project in projects:
-    #     print(project)
 if __name__ == '__main__':
     main()
